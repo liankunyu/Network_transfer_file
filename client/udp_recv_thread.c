@@ -88,7 +88,7 @@ void *udp_recv_thread(void *arg)
 	}
 
 	/*接收文件*/
-	char buf[BUFF_SIZE];
+	char buf[BUFF_SIZE] = {0};
 	while ((recv_len = recvfrom(udp_fd, buf, sizeof(buf), 0, (struct sockaddr *)&server_addr, &addrlen)) > 0)
 	{
 
@@ -109,6 +109,11 @@ void *udp_recv_thread(void *arg)
 	stat(filename, &statbuf);
 	int filesize = statbuf.st_size;
 	char *readbuf = (char *)malloc(filesize + 1);
+	if (NULL == readbuf)
+	{
+		printf("文件读取内存申请失败,程序退出！\n");
+		exit(1);
+	}
 	read(fd, readbuf, filesize);
 	/*sha256 验证*/
 	sha_256(digestclient, (char *)readbuf);
@@ -122,8 +127,9 @@ void *udp_recv_thread(void *arg)
 	{
 		printf("文件接收失败\n");
 	}
-	close(fd); //关闭文件
-
+	/*释放malloc申请的内存*/
+	free(readbuf);
+	/* 关闭文件 */
 	close(fd);
 	return NULL;
 }

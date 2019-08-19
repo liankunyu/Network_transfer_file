@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 	int inputnum = 0;
 	while (1)
 	{
-		printf("\n\n\n\n\n\n");
+		printf("\n");
 		bzero(&packet, sizeof(packet));
 		while (1)
 		{

@@ -36,7 +36,7 @@
  */
 int main(int argc, char *argv[])
 {
-	printf("Server Start\n");
+	printf("服务开启\n");
 
 	pthread_t explore_pid, tcp_pid, udp_pid;
 	char *explore_msg = "thread";
@@ -46,37 +46,37 @@ int main(int argc, char *argv[])
 	/*创建探测线程处理client的多播*/
 	if (pthread_create(&explore_pid, NULL, explore_process, (void *)&explore_msg) < 0)
 	{
-		printf("explore pthread_create error\n");
+		printf("探测线程创建失败\n");
 	}
 	/*在创建线程后等待100毫秒*/
 	usleep(100);
 	/*创建tcp线程处理client的tcp连接*/
 	if (pthread_create(&tcp_pid, NULL, tcp_process, (void *)&tcp_msg) < 0)
 	{
-		printf("explore pthread_create error\n");
+		printf("tcp服务线程创建失败\n");
 	}
 	usleep(100);
 	/*创建udp线程处理client的udp连接*/
 	if (pthread_create(&udp_pid, NULL, udp_process, (void *)&udp_msg) < 0)
 	{
-		printf("explore pthread_create error\n");
+		printf("udp线程创建失败\n");
 	}
 	usleep(100);
 
 	void *result = NULL;
 	if (pthread_join(explore_pid, &result) < 0)
 	{
-		printf("fail to recollect explore_pid\n");
+		printf("回收探测线程失败\n");
 		exit(1);
 	}
 	if (pthread_join(tcp_pid, &result) < 0)
 	{
-		printf("fail to recollect tcp_pid\n");
+		printf("回收tcp线程失败\n");
 		exit(1);
 	}
 	if (pthread_join(udp_pid, &result) < 0)
 	{
-		printf("fail to recollect udp_pid\n");
+		printf("回收udp线程失败\n");
 		exit(1);
 	}
 	while (1)

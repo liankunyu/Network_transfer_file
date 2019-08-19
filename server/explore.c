@@ -68,7 +68,7 @@ int socket_init(void)
  *	@param	sockfd        socket创建符
  *	@param	des_address   目标IP地址
  *  @param	lenth         地址长度
- *	@return	-1失败          成功，返回实际发送长度
+ *	@return	-1失败         成功，返回实际发送长度
  */
 int send_ack(int sockfd, const struct sockaddr *des_address, socklen_t lenth)
 {
@@ -119,7 +119,7 @@ void *explore_process(void *arg)
 			{
 			case DISCOVERY:
 				ret = send_ack(sockfd, (const struct sockaddr *)&data_from_addr, data_from_addrlen);
-				printf("the num bytes send is %d.\n", ret);
+				printf("发送字节数 %d.\n", ret);
 				break;
 			case TCP:
 				printf("erro\n");
@@ -127,6 +127,6 @@ void *explore_process(void *arg)
 				printf("erro\n");
 			}
 		}
-		printf("success\n");
+		printf("成功\n");
 	}
 }

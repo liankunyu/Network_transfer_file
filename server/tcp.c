@@ -89,28 +89,28 @@ void *tcp_data_handle(void *arg)
 	int client_sock = *((int *)(arg));
 
 	/*文件路径*/
-	char filepath[MAX_DATA_SIZE];
+	char filepath[MAX_DATA_SIZE] = {0};
 	/*文件名*/
-	char filename[MAX_DATA_SIZE];
+	char filename[MAX_DATA_SIZE] = {0};
 	/*缓冲区*/
-	char buffer[BUFF_SIZE];
+	char buffer[BUFF_SIZE] = {0};
 	/*文件接收长度*/
-	int recv_len;
+	int recv_len = 0;
 	/*文件写入长度*/
-	int write_len;
+	int write_len = 0;
 	/*文件路径长度*/
-	int file_path_len;
+	int file_path_len = 0;
 
 	Net_packet packet;
 	/*接收数据包，根据packet.data_type判断是上传/下载*/
 	recv(client_sock, &packet, sizeof(packet), 0);
 	memset(filepath, '\0', sizeof(filepath));
 	file_path_len = recv(client_sock, filepath, 256, 0);
-	printf("filepath :%s\n", filepath);
+	printf("文件路径:%s\n", filepath);
 
 	if (file_path_len < 0)
 	{
-		printf("recv filepath error!\n");
+		printf("接收文件路径错误!\n");
 	}
 	else
 	{
@@ -127,7 +127,7 @@ void *tcp_data_handle(void *arg)
 			}
 		}
 		strcpy(filename, filepath + (strlen(filepath) - k) + 1);
-		printf("filename :%s\n", filename);
+		printf("文件名 :%s\n", filename);
 	}
 	if (packet.data_type == 'u' | packet.data_type == 'U')
 	{
@@ -188,24 +188,31 @@ void *tcp_data_handle(void *arg)
 			}
 #endif
 			/*用来存储sha256签名*/
-			char digest[1000];
+			char digest[1000] = {0};
 			/*获得文件大小*/
 			struct stat statbuf;
 			stat(filename, &statbuf);
 			int filesize = statbuf.st_size;
 			char *readbuf = (char *)malloc(filesize + 1);
+			if (NULL == readbuf)
+			{
+				printf("文件读取内存申请失败,程序退出！\n");
+				exit(1);
+			}
 			read(filename, readbuf, filesize);
 			/*sha256 验证*/
 			sha_256(digest, (char *)readbuf);
 			/*发送验证码*/
 			send(client_sock, digest, 1000, 0);
 			printf("文件接收完成\n");
-
+			/*释放malloc申请的内存*/
+			free(readbuf);
+			/* 关闭文件 */
 			close(fp);
 		}
 		else
 		{
-			printf("filename is null!\n");
+			printf("文件名是 null!\n");
 		}
 		close(client_sock);
 	}
@@ -221,13 +228,13 @@ void *tcp_data_handle(void *arg)
 		}
 
 		/**********发送文件************/
-		char buf[BUFF_SIZE];
-		int buf_len;
+		char buf[BUFF_SIZE] = {0};
+		int buf_len = 0;
 		while ((buf_len = read(fd, buf, sizeof(buf))) > 0)
 		{
 			if ((send_len = send(client_sock, buf, buf_len, 0)) < 0)
 			{
-				printf("send failed ! \n");
+				printf("发送失败! \n");
 				break;
 			}
 			bzero(buf, BUFF_SIZE);
@@ -236,21 +243,28 @@ void *tcp_data_handle(void *arg)
 		/*使用recv函数阻塞send验证码，不然会和上文环境中的send粘在一起*/
 		recv(client_sock, buf, sizeof(buf), 0);
 		/*用来存储sha256签名*/
-		char digest[1000];
+		char digest[1000] = {0};
 		/*获得文件大小*/
 		struct stat statbuf;
 		stat(filepath, &statbuf);
 		int filesize = statbuf.st_size;
 		char *readbuf = (char *)malloc(filesize + 1);
+		if (NULL == readbuf)
+		{
+			printf("文件读取内存申请失败,程序退出！\n");
+			exit(1);
+		}
 		read(filepath, readbuf, filesize);
 		/*sha256 验证*/
 		sha_256(digest, (char *)readbuf);
 		/*发送验证码*/
 		send(client_sock, digest, 1000, 0);
 		printf("文件发送完成\n");
-
+		/*释放malloc申请的内存*/
+		free(readbuf);
 		/*关闭文件 */
 		close(fd);
+		/*关闭socket */
 		close(client_sock);
 	}
 }

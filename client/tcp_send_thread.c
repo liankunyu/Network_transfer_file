@@ -58,8 +58,8 @@ void *tcp_send_thread(void *arg)
 	send(tcp_fd, &path, sizeof(path), 0);
 
 	/* 发送文件 */
-	char buf[BUFF_SIZE];
-	int buf_len;
+	char buf[BUFF_SIZE] = {0};
+	int buf_len = 0;
 	while ((buf_len = read(fd, buf, sizeof(buf))) > 0)
 	{
 		if (send(tcp_fd, buf, buf_len, 0) < 0)
@@ -78,6 +78,11 @@ void *tcp_send_thread(void *arg)
 	stat(path, &statbuf);
 	int filesize = statbuf.st_size;
 	char *readbuf = (char *)malloc(filesize + 1);
+	if (NULL == readbuf)
+	{
+		printf("文件读取内存申请失败,程序退出！\n");
+		exit(1);
+	}
 	read(fd, readbuf, filesize);
 	/*sha256 验证*/
 	sha_256(digestclient, (char *)readbuf);
@@ -91,6 +96,8 @@ void *tcp_send_thread(void *arg)
 	{
 		printf("文件接收失败\n");
 	}
+	/*释放malloc申请的内存*/
+	free(readbuf);
 	/* 关闭文件 */
 	close(fd);
 	return NULL;

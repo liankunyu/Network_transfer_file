@@ -39,21 +39,21 @@ void *udp_process(void *arg)
 	pthread_detach(pthread_self());
 
 	/*文件路径*/
-	char filepath[MAX_DATA_SIZE];
+	char filepath[MAX_DATA_SIZE] = {0};
 	/*文件名*/
-	char filename[MAX_DATA_SIZE];
+	char filename[MAX_DATA_SIZE] = {0};
 	/*缓冲区*/
-	char buffer[BUFF_SIZE];
+	char buffer[BUFF_SIZE] = {0};
 	/*文件接收长度*/
-	int recv_len;
+	int recv_len = 0;
 	/*文件写入长度*/
-	int write_len;
+	int write_len = 0;
 	/*文件路径长度*/
-	int file_path_len;
+	int file_path_len = 0;
 
-	int sockfd;
+	int sockfd = 0;
 	/*udp连接的客户端id*/
-	int client_sock;
+	int client_sock = 0;
 	Net_packet packet;
 	sockfd = create_udp_server(UDPSERVER_PORT);
 	if (-1 == sockfd)
@@ -70,11 +70,11 @@ void *udp_process(void *arg)
 		recvfrom(sockfd, &packet, sizeof(packet), 0, (struct sockaddr *)&client_addr, &addrlen);
 		memset(filepath, '\0', sizeof(filepath));
 		file_path_len = recvfrom(sockfd, filepath, 256, 0, (struct sockaddr *)&client_addr, &addrlen);
-		printf("filepath :%s\n", filepath);
+		printf("文件路径 :%s\n", filepath);
 
 		if (file_path_len < 0)
 		{
-			printf("recv filepath error!\n");
+			printf("接收文件路径错误!\n");
 		}
 		else
 		{
@@ -91,7 +91,7 @@ void *udp_process(void *arg)
 				}
 			}
 			strcpy(filename, filepath + (strlen(filepath) - k) + 1);
-			printf("filename :%s\n", filename);
+			printf("文件名 :%s\n", filename);
 		}
 		if (packet.data_type == 'u' | packet.data_type == 'U')
 		{
@@ -104,13 +104,13 @@ void *udp_process(void *arg)
 
 					if (recv_len < 0)
 					{
-						printf("recv error!\n");
+						printf("接收错误!\n");
 						break;
 					}
 					write_len = write(fp, buffer, recv_len);
 					if (write_len < recv_len)
 					{
-						printf("write error!\n");
+						printf("写入错误!\n");
 						break;
 					}
 					bzero(buffer, BUFF_SIZE);
@@ -119,19 +119,26 @@ void *udp_process(void *arg)
 				}
 
 				/*用来存储sha256签名*/
-				char digest[1000];
+				char digest[1000] = {0};
 				/*获得文件大小*/
 				struct stat statbuf;
 				stat(filename, &statbuf);
 				int filesize = statbuf.st_size;
 				char *readbuf = (char *)malloc(filesize + 1);
+				if (NULL == readbuf)
+				{
+					printf("文件读取内存申请失败,程序退出！\n");
+					exit(1);
+				}
 				read(fp, readbuf, filesize);
 				/*sha256 验证*/
 				sha_256(digest, (char *)readbuf);
 				/*发送验证码*/
 				sendto(sockfd, digest, 1000, 0, (struct sockaddr *)&client_addr, addrlen);
 				printf("udp客户端文件上传完成\n");
-
+				/*释放malloc申请的内存*/
+				free(readbuf);
+				/* 关闭文件 */
 				close(fp);
 			}
 		}
@@ -146,13 +153,13 @@ void *udp_process(void *arg)
 				continue;
 			}
 			/**********发送文件************/
-			char buf[BUFF_SIZE];
-			int buf_len;
+			char buf[BUFF_SIZE] = {0};
+			int buf_len = 0;
 			while ((buf_len = read(fd, buf, sizeof(buf))) > 0)
 			{
 				if ((send_len = sendto(sockfd, buf, buf_len, 0, (struct sockaddr *)&client_addr, addrlen)) < 0)
 				{
-					printf("send failed ! \n");
+					printf("发送错误! \n");
 					break;
 				}
 				bzero(buf, BUFF_SIZE);
@@ -164,18 +171,25 @@ void *udp_process(void *arg)
 			sendto(sockfd, buf, 0, 0, (struct sockaddr *)&client_addr, addrlen);
 
 			/*用来存储sha256签名*/
-			char digest[1000];
+			char digest[1000] = {0};
 			/*获得文件大小*/
 			struct stat statbuf;
 			stat(filename, &statbuf);
 			int filesize = statbuf.st_size;
 			char *readbuf = (char *)malloc(filesize + 1);
+			if (NULL == readbuf)
+			{
+				printf("文件读取内存申请失败,程序退出！\n");
+				exit(1);
+			}
 			read(fd, readbuf, filesize);
 			/*sha256 验证*/
 			sha_256(digest, (char *)readbuf);
 			/*发送验证码*/
 			sendto(sockfd, digest, 1000, 0, (struct sockaddr *)&client_addr, addrlen);
 			printf("udp发送完成!\n");
+			/*释放malloc申请的内存*/
+			free(readbuf);
 			/*关闭文件*/
 			close(fd);
 		}

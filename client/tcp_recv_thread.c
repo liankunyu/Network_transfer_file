@@ -77,7 +77,7 @@ void *tcp_recv_thread(void *arg)
 		return NULL;
 	}
 	fd_set rset;
-	char buf[BUFF_SIZE];
+	char buf[BUFF_SIZE] = {0};
 	struct timeval timeout =
 		{
 			.tv_sec = 0,
@@ -101,10 +101,10 @@ void *tcp_recv_thread(void *arg)
 			break;
 		}
 	}
-	
+
 	/*开启tcp.c中recv的阻塞，使其发送验证码*/
-	memset(buf,1,100);
-	send(tcp_fd,buf,100,0);
+	memset(buf, 1, 100);
+	send(tcp_fd, buf, 100, 0);
 	/*用来存储客户端sha256签名*/
 	char digestclient[1000] = {0};
 	char digestserver[1000] = {0};
@@ -113,6 +113,11 @@ void *tcp_recv_thread(void *arg)
 	stat(filename, &statbuf);
 	int filesize = statbuf.st_size;
 	char *readbuf = (char *)malloc(filesize + 1);
+	if (NULL == readbuf)
+	{
+		printf("文件读取内存申请失败,程序退出！\n");
+		exit(1);
+	}
 	read(fd, readbuf, filesize);
 	/*sha256 验证*/
 	sha_256(digestclient, (char *)readbuf);
@@ -126,7 +131,9 @@ void *tcp_recv_thread(void *arg)
 	{
 		printf("文件接收失败\n");
 	}
-
+	/*释放malloc申请的内存*/
+	free(readbuf);
+	/*关闭文件*/
 	close(fd);
 	return NULL;
 }

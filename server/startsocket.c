@@ -35,7 +35,7 @@ int start_server(int port, int type)
     int sock_fd = socket(AF_INET, type, 0);
     if (sock_fd < 0)
     {
-        printf("create socket error\n");
+        printf("创建socket失败\n");
         return -1;
     }
 
@@ -61,10 +61,10 @@ int start_server(int port, int type)
             printf("listen error\n");
             return -1;
         }
-        printf("tcp server start\n");
+        printf("tcp 服务开启\n");
     }
     else
-        printf("udp server start\n");
+        printf("udp 服务开启\n");
     return sock_fd;
 }
 
