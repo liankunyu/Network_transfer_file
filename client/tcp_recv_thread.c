@@ -13,7 +13,7 @@
  *	   @warning 这里填写本文件相关的警告信息
  */
 
-#include <time.h>
+#include <sys/time.h>
 #include <pthread.h>
 #include <string.h>
 #include <stdio.h>
@@ -69,6 +69,10 @@ void *tcp_recv_thread(void *arg)
 		/*从文件路径中获取文件名*/
 		strcpy(filename, filepath + (strlen(filepath) - k) + 1);
 	}
+
+	/*计算传输用时*/
+	struct timeval starttime, endtime;
+	gettimeofday(&starttime, 0);
 
 	int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
 	if (fd < 0)
@@ -131,6 +135,14 @@ void *tcp_recv_thread(void *arg)
 	{
 		printf("文件接收失败\n");
 	}
+
+	/*计算传输用时*/
+	gettimeofday(&endtime, 0);
+	double timeuse = 1000000 * (endtime.tv_sec - starttime.tv_sec) + endtime.tv_usec - starttime.tv_usec;
+	/*除以1000则进行毫秒计时，如果除以1000000则进行秒级别计时，如果除以1则进行微妙级别计时*/
+	timeuse /= 1000;
+	printf("文件传输用时=%f\n", timeuse);
+
 	/*释放malloc申请的内存*/
 	free(readbuf);
 	/*关闭文件*/
