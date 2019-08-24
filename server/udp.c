@@ -35,8 +35,8 @@
  */
 void *udp_process(void *arg)
 {
-	/*设置分离属性*/
-	pthread_detach(pthread_self());
+	/*不能设置分离属性，与pthread_join冲突*/
+	/*pthread_detach(pthread_self());*/
 
 	/*文件路径*/
 	char filepath[MAX_DATA_SIZE] = {0};

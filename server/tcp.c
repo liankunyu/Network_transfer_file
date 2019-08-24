@@ -38,8 +38,8 @@ void *tcp_data_handle(void *arg);
  */
 void *tcp_process(void *arg)
 {
-	/*设置分离属性*/
-	pthread_detach(pthread_self());
+	/*不能设置分离属性，与pthread_join冲突*/
+	/*pthread_detach(pthread_self());*/
 
 	int sockfd;
 	/*tcp连接的客户端id*/

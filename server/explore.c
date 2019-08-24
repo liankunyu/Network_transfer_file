@@ -97,8 +97,9 @@ int send_ack(int sockfd, const struct sockaddr *des_address, socklen_t lenth)
  */
 void *explore_process(void *arg)
 {
-	/*设置分离属性*/
-	pthread_detach(pthread_self());
+	/*不能设置分离属性，与pthread_join冲突*/
+	/*pthread_detach(pthread_self());*/
+
 	int sockfd = socket_init();
 	int ret = -1;
 	struct sockaddr_in data_from_addr;

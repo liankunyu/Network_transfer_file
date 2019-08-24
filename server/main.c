@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
 		printf("回收udp线程失败\n");
 		exit(1);
 	}
-	while (1)
-	{
-	}
+
 	return 0;
 }
