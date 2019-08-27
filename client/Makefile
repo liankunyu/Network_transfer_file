@@ -1,15 +1,28 @@
+DIR_INC = ./include
+DIR_SRC = ./src
+DIR_OBJ = ./obj
+DIR_BIN = ./bin
 
+SRC = $(wildcard ${DIR_SRC}/*.c)
+OBJ = $(patsubst %.c,${DIR_OBJ}/%.o,$(notdir ${SRC}))
+
+TARGET = client
+
+BIN_TARGET = ${DIR_BIN}/${TARGET}
+
+CC = gcc
 LIBS = -lpthread
-OBJS = main.o startsocket.o tcp_recv_thread.o tcp_send_thread.o udp_recv_thread.o udp_send_thread.o sha256.o
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -I${DIR_INC}
 
-client: ${OBJS}
-	gcc -o $@ ${CFLAGS} ${OBJS} ${LIBS}
+${BIN_TARGET}:$(OBJ)
+	$(CC) $(OBJ) $(LIBS) -o $@
 
+${DIR_OBJ}/%.o:${DIR_SRC}/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@echo "cleanning project"
-	-rm main *.o
-	@echo "clean completed"
+	find ${DIR_OBJ} -name *.o | xargs rm -rf
+	find ${DIR_BIN} -name client | xargs rm -rf
 .PHONY: clean
+
 
