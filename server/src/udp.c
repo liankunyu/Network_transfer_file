@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "udp.h"
 #include "sha256.h"
@@ -52,8 +53,6 @@ void *udp_process(void *arg)
 	int file_path_len = 0;
 
 	int sockfd = 0;
-	/*udp连接的客户端id*/
-	int client_sock = 0;
 	Net_packet packet;
 	sockfd = create_udp_server(UDPSERVER_PORT);
 	if (-1 == sockfd)
@@ -63,6 +62,7 @@ void *udp_process(void *arg)
 
 	/*客户端地址结构*/
 	struct sockaddr_in client_addr;
+	bzero(&client_addr, sizeof(client_addr));
 	socklen_t addrlen = sizeof(client_addr);
 	while (1)
 	{
@@ -93,13 +93,13 @@ void *udp_process(void *arg)
 			strcpy(filename, filepath + (strlen(filepath) - k) + 1);
 			printf("文件名 :%s\n", filename);
 		}
-		if (packet.data_type == 'u' | packet.data_type == 'U')
+		if ((packet.data_type == 'u') | (packet.data_type == 'U'))
 		{
 
 			int fp = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
 			if (fp != -1)
 			{
-				while (recv_len = recvfrom(sockfd, buffer, BUFF_SIZE, 0, (struct sockaddr *)&client_addr, &addrlen))
+				while ((recv_len = recvfrom(sockfd, buffer, BUFF_SIZE, 0, (struct sockaddr *)&client_addr, &addrlen)))
 				{
 
 					if (recv_len < 0)
@@ -130,6 +130,8 @@ void *udp_process(void *arg)
 					printf("文件读取内存申请失败,程序退出！\n");
 					exit(1);
 				}
+				//将文件的读写位置移动到文件的开始
+				lseek(fp, 0, SEEK_SET);
 				read(fp, readbuf, filesize);
 				/*sha256 验证*/
 				sha_256(digest, (char *)readbuf);
@@ -143,7 +145,7 @@ void *udp_process(void *arg)
 			}
 		}
 
-		if (packet.data_type == 'd' | packet.data_type == 'D')
+		if ((packet.data_type == 'd') | (packet.data_type == 'D'))
 		{
 			int send_len = 0;
 			int fd = open(filepath, O_RDONLY, 0666); //只读打开文件
@@ -182,6 +184,8 @@ void *udp_process(void *arg)
 				printf("文件读取内存申请失败,程序退出！\n");
 				exit(1);
 			}
+			//将文件的读写位置移动到文件的开始
+			lseek(fd, 0, SEEK_SET);
 			read(fd, readbuf, filesize);
 			/*sha256 验证*/
 			sha_256(digest, (char *)readbuf);

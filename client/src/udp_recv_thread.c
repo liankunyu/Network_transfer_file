@@ -83,7 +83,7 @@ void *udp_recv_thread(void *arg)
 	/*计算传输用时*/
 	struct timeval starttime, endtime;
 	gettimeofday(&starttime, 0);
-	
+
 	int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
 	if (fd < 0)
 	{
@@ -118,6 +118,8 @@ void *udp_recv_thread(void *arg)
 		printf("文件读取内存申请失败,程序退出！\n");
 		exit(1);
 	}
+	//将文件的读写位置移动到文件的开始
+	lseek(fd, 0, SEEK_SET);
 	read(fd, readbuf, filesize);
 	/*sha256 验证*/
 	sha_256(digestclient, (char *)readbuf);
@@ -133,10 +135,10 @@ void *udp_recv_thread(void *arg)
 	}
 
 	/*计算传输用时*/
-	gettimeofday(&endtime,0);
-	double timeuse = 1000000*(endtime.tv_sec - starttime.tv_sec) + endtime.tv_usec - starttime.tv_usec;
+	gettimeofday(&endtime, 0);
+	double timeuse = 1000000 * (endtime.tv_sec - starttime.tv_sec) + endtime.tv_usec - starttime.tv_usec;
 	/*除以1000则进行毫秒计时，如果除以1000000则进行秒级别计时，如果除以1则进行微妙级别计时*/
-	timeuse /=1000;
+	timeuse /= 1000;
 	printf("文件传输用时=%f\n", timeuse);
 
 	/*释放malloc申请的内存*/

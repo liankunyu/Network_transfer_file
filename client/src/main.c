@@ -51,7 +51,6 @@ int start_discovery(void)
 	int sockfd = -1;
 	int ret = -1;
 	const int optval = 1;
-	struct sockaddr_in data_from_addr;
 	socklen_t data_from_addrlen;
 
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -157,6 +156,7 @@ int start_discovery(void)
 	{
 		return 0;
 	}
+	return 0;
 }
 
 /**	@fn	int server_discovery(void)
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 					getchar();
 					/*输入指令，上传或下载*/
 					scanf("%c", &packet.data_type);
-					if (packet.data_type == 'U' | packet.data_type == 'u' | packet.data_type == 'D' | packet.data_type == 'd')
+					if ((packet.data_type == 'U') | (packet.data_type == 'u') | (packet.data_type == 'D') | (packet.data_type == 'd'))
 					{
 						break;
 					}
@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 				}
 				/*发送指令*/
 				send(tcp_fd, &packet, sizeof(packet), 0);
-				if (packet.data_type == 'U' | packet.data_type == 'u')
+				if ((packet.data_type == 'U') | (packet.data_type == 'u'))
 				{
 					/*tcp文件发送线程*/
 					pthread_t tcp_send_tid;
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 					/*阻塞本线程*/
 					pthread_join(tcp_send_tid, &result);
 				}
-				if (packet.data_type == 'D' | packet.data_type == 'd')
+				if ((packet.data_type == 'D') | (packet.data_type == 'd'))
 				{
 					/*tcp文件下载线程*/
 					pthread_t tcp_recv_tid;
@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
 					getchar();
 					/*输入指令，上传或下载*/
 					scanf("%c", &packet.data_type);
-					if (packet.data_type == 'U' | packet.data_type == 'u' | packet.data_type == 'D' | packet.data_type == 'd')
+					if ((packet.data_type == 'U') | (packet.data_type == 'u') | (packet.data_type == 'D') | (packet.data_type == 'd'))
 					{
 						break;
 					}
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
 				}
 				/*发送指令*/
 				send(udp_fd, &packet, sizeof(packet), 0);
-				if (packet.data_type == 'U' | packet.data_type == 'u')
+				if ((packet.data_type == 'U') | (packet.data_type == 'u'))
 				{
 					/* udp文件发送线程*/
 					pthread_t udp_send_tid;
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
 					/*阻塞本线程*/
 					pthread_join(udp_send_tid, &result);
 				}
-				if (packet.data_type == 'D' | packet.data_type == 'd')
+				if ((packet.data_type == 'D') | (packet.data_type == 'd'))
 				{
 					/*udp文件下载线程*/
 					pthread_t udp_recv_tid;

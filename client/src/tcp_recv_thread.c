@@ -122,6 +122,8 @@ void *tcp_recv_thread(void *arg)
 		printf("文件读取内存申请失败,程序退出！\n");
 		exit(1);
 	}
+	//将文件的读写位置移动到文件的开始
+	lseek(fd, 0, SEEK_SET);
 	read(fd, readbuf, filesize);
 	/*sha256 验证*/
 	sha_256(digestclient, (char *)readbuf);

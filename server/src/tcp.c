@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "tcp.h"
 #include "sha256.h"
@@ -129,7 +130,7 @@ void *tcp_data_handle(void *arg)
 		strcpy(filename, filepath + (strlen(filepath) - k) + 1);
 		printf("文件名 :%s\n", filename);
 	}
-	if (packet.data_type == 'u' | packet.data_type == 'U')
+	if ((packet.data_type == 'u') | (packet.data_type == 'U'))
 	{
 
 		int fp = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
@@ -169,24 +170,7 @@ void *tcp_data_handle(void *arg)
 					break;
 				}
 			}
-#if 0
-			while (recv_len = recv(client_sock, buffer, BUFF_SIZE, 0))
-			{
 
-				if (recv_len < 0)
-				{
-					printf("接收错误!\n");
-					break;
-				}
-				write_len = write(fp, buffer, recv_len);
-				if (write_len < recv_len)
-				{
-					printf("写入错误!\n");
-					break;
-				}
-				bzero(buffer, BUFF_SIZE);
-			}
-#endif
 			/*用来存储sha256签名*/
 			char digest[1000] = {0};
 			/*获得文件大小*/
@@ -199,7 +183,9 @@ void *tcp_data_handle(void *arg)
 				printf("文件读取内存申请失败,程序退出！\n");
 				exit(1);
 			}
-			read(filename, readbuf, filesize);
+			//将文件的读写位置移动到文件的开始
+			lseek(fp, 0, SEEK_SET);
+			read(fp, readbuf, filesize);
 			/*sha256 验证*/
 			sha_256(digest, (char *)readbuf);
 			/*发送验证码*/
@@ -217,7 +203,7 @@ void *tcp_data_handle(void *arg)
 		close(client_sock);
 	}
 
-	if (packet.data_type == 'd' | packet.data_type == 'D')
+	if ((packet.data_type == 'd') | (packet.data_type == 'D'))
 	{
 		int send_len;
 		int fd = open(filepath, O_RDONLY, 0666);
@@ -254,7 +240,9 @@ void *tcp_data_handle(void *arg)
 			printf("文件读取内存申请失败,程序退出！\n");
 			exit(1);
 		}
-		read(filepath, readbuf, filesize);
+		//将文件的读写位置移动到文件的开始
+		lseek(fd, 0, SEEK_SET);
+		read(fd, readbuf, filesize);
 		/*sha256 验证*/
 		sha_256(digest, (char *)readbuf);
 		/*发送验证码*/

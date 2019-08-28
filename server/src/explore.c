@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "protocol.h"
 #include "explore.h"
@@ -124,8 +125,13 @@ void *explore_process(void *arg)
 				break;
 			case TCP:
 				printf("erro\n");
+				break;
 			case UDP:
 				printf("erro\n");
+				break;
+			default:
+				printf("接收功能字节错误\n");
+				break;
 			}
 		}
 		printf("成功\n");

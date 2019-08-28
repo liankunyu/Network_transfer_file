@@ -70,10 +70,10 @@ int start_server(int port, int type)
 
 int create_tcp_server(int port)
 {
-    start_server(port, SOCK_STREAM);
+    return start_server(port, SOCK_STREAM);
 }
 
 int create_udp_server(int port)
 {
-    start_server(port, SOCK_DGRAM);
+    return start_server(port, SOCK_DGRAM);
 }

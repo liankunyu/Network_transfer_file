@@ -48,20 +48,15 @@ int main(int argc, char *argv[])
 	{
 		printf("探测线程创建失败\n");
 	}
-	/*在创建线程后等待100毫秒*/
-	usleep(100);
 	/*创建tcp线程处理client的tcp连接*/
 	if (pthread_create(&tcp_pid, NULL, tcp_process, (void *)&tcp_msg) < 0)
 	{
 		printf("tcp服务线程创建失败\n");
 	}
-	usleep(100);
-	/*创建udp线程处理client的udp连接*/
 	if (pthread_create(&udp_pid, NULL, udp_process, (void *)&udp_msg) < 0)
 	{
 		printf("udp线程创建失败\n");
 	}
-	usleep(100);
 
 	void *result = NULL;
 	if (pthread_join(explore_pid, &result) < 0)
