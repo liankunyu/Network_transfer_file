@@ -28,6 +28,7 @@
 #include "serverthread.h"
 #include "startsocket.h"
 #include "protocol.h"
+#include "sha256.h"
 
 /**	@fn	void *tcp_send_thread(void * arg) 
  *	@brief	客户端TCP上传文件线程 

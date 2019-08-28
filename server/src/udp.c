@@ -199,4 +199,5 @@ void *udp_process(void *arg)
 		}
 	}
 	close(sockfd);
+	return NULL;
 }

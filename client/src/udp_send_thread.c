@@ -30,6 +30,7 @@
 #include "startsocket.h"
 #include "protocol.h"
 #include "main.h"
+#include "sha256.h"
 
 extern char *connect_ip;
 

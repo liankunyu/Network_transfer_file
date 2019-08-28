@@ -75,6 +75,7 @@ void *tcp_process(void *arg)
 		}
 	}
 	close(sockfd);
+	return NULL;
 }
 
 /**	@fn	void *tcp_data_handle(void * arg) 
@@ -255,4 +256,5 @@ void *tcp_data_handle(void *arg)
 		/*关闭socket */
 		close(client_sock);
 	}
+	return NULL;
 }

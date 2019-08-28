@@ -1,0 +1,20 @@
+20102 02:32:43.907642 execve("./server", ["./server"], [/* 60 vars */]) = 0 <0.000095>
+20102 02:32:43.907847 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory) <0.000005>
+20102 02:32:43.907885 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory) <0.000005>
+20102 02:32:43.907905 open("/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3 <0.000006>
+20102 02:32:43.907945 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory) <0.000005>
+20102 02:32:43.907962 open("/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3 <0.000006>
+20102 02:32:43.908053 access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory) <0.000005>
+20102 02:32:43.908074 open("/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3 <0.000005>
+20107 02:33:07.683035 open("read.sh", O_RDWR|O_CREAT|O_TRUNC, 0666) = 8 <0.000032>
+20107 02:33:08.184894 stat("read.sh", {st_mode=S_IFREG|0664, st_size=3402, ...}) = 0 <0.000021>
+20107 02:33:08.186259 open("/proc/sys/vm/overcommit_memory", O_RDONLY|O_CLOEXEC) = 9 <0.000025>
+20107 02:33:08.187027 +++ exited with 0 +++
+20123 02:34:51.426785 open("read.sh", O_RDWR|O_CREAT|O_TRUNC, 0666) = 8 <0.000034>
+20123 02:34:51.928560 stat("read.sh", {st_mode=S_IFREG|0664, st_size=3402, ...}) = 0 <0.000020>
+20123 02:34:51.930110 +++ exited with 0 +++
+20102 05:35:30.782145 --- SIGTERM {si_signo=SIGTERM, si_code=SI_USER, si_pid=22026, si_uid=0} ---
+20105 05:35:30.782699 +++ killed by SIGTERM +++
+20104 05:35:30.782708 +++ killed by SIGTERM +++
+20103 05:35:30.782712 +++ killed by SIGTERM +++
+20102 05:35:30.782726 +++ killed by SIGTERM +++
