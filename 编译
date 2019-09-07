@@ -1,0 +1,34 @@
+一、Iperf3.1.3移植与使用
+	1、修改文件
+		1.1 根目录Makefile.in：屏蔽掉examples编译，不屏蔽则编译出错，我们不没用到该工具所以将其屏蔽，如下；
+			SUBDIRS = src #examples
+ 
+		1.2 src/Makefile.in:去掉“-pg”编译选项
+		更改前：iperf3_profile_CFLAGS = -pg -g
+				iperf3_profile_LDADD = libiperf.la
+				iperf3_profile_LDFLAGS = -pg -g
+		更改后：iperf3_profile_CFLAGS = -g
+				iperf3_profile_LDADD = libiperf.la
+				iperf3_profile_LDFLAGS = -g
+	2、编译安装
+		2.1 生成makefile文件
+			安卓环境下移植：
+			./configure --host=arm-linux-androideabi CC='arm-linux-androideabi-gcc --sysroot=/opt/android-ndk-r10b/platforms/android-9/arch-arm' CFLAGS=-static CXX='arm-linux-androideabi-g++ --sysroot=/opt/android-ndk-r10b/platforms/android-9/arch-arm' CXXFLAGS=-static --prefix=/usr/local/iperf3.1.3
+
+			海思交叉编译器环境下移植：
+			./configure --host=arm-hisiv500-linux CFLAGS=-static CXXFLAGS=-static --prefix=/usr/local/iperf3.1.3
+
+			X86环境下移植：
+			./configure CFLAGS=-static CXXFLAGS=-static --prefix=/usr/local/iperf3.1.3
+			注意：-static的作用是将iperf3工具和其动态库编译在一起，如果不加则分开，使用iperf3时必须连同其动态库一起使用；
+				--host=arm-hisiv500-linux 配置并指定交叉编译工具链，具体"arm-hisiv500"后面追加到什么程度可以自己试出来，"arm-hisiv500-linux""arm-hisiv500-linux-""arm-hisiv500-linux-gcc"，直到./configure 成功为止。
+				--prefix=/xxx 用户指定安装路径，如果不添加，配置文件中会有一个默认安装路径，如果是为了编译arm 平台，最好加上，这样方便移植。
+		2.2编译安装
+			执行make distclean;
+				make;
+				make install;#在prefix设置的文件夹中可找到iperf3
+	参考资料：
+		1、https://blog.csdn.net/edw200/article/details/70502522
+		2、https://www.cnblogs.com/big-devil/p/7625891.html
+		3、https://www.cnblogs.com/streammm/p/6099280.html?utm_source=itdadao&utm_medium=referral
+		4、https://blog.csdn.net/u013625961/article/details/53892821
