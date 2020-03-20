@@ -1,0 +1,9 @@
+﻿浮点数与4个字节的转换：https://blog.csdn.net/oshan2012/article/details/79216444
+CI自动化打包；
+网络抓包工具：wireshark、Fiddler
+串口抓包工具：XCOM、sscom
+远程控制：rview
+电脑窗口标签化工具：Clover
+连接FTP软件:flashFXP
+终端仿真程序：secureCRT、Putty、Xshell、MobaXterm
+文件比较软件：Beyond Compare
