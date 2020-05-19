@@ -7,3 +7,114 @@ CI自动化打包；
 连接FTP软件:flashFXP
 终端仿真程序：secureCRT、Putty、Xshell、MobaXterm
 文件比较软件：Beyond Compare
+
+对于32位和64位编程，一定要注意unsigned long的所占字节数
+32位系统上sizeof(unsigned long) = 4
+64位系统上sizeof(unsigned long) = 8
+其他类型都一致
+
+程序数据有两种：一种是写在各个.c文件中的数据，第二种是写在配置文件的数据。
+写在.c中的数据只读，可保存default数据和程序共有的数据
+写在配置文件中的数据可以被更改，配置文件的数据有两种改变方式，一种是程序更改，另一种是程序和外部都能更改
+配置文件可以是二进制文件，这种方式直接将数据保存在文件中，另外还有XML、JSON、数据库这种格式化的数据，配置文件的数据库一般选用轻型的sqlite
+如果不想让外人直观的看到配置文件内的数据可以保存成二进制或者使用数据库，加密的XML和JSON我不喜欢
+根据我的学习：
+首先SportCamera的基本数据写在param.c文件中，每次开机通过版本号进行更迭数据，当程序当前的版本号小于升级的程序包时就会加载新数据，这种数据是最基本的数据，在配置文件出错时就会利用这些基本数据恢复配置文件。
+还有一些能力集.c文件，是针对不同的机型更改的数据（只读），param.c中的数据会被配置文件数据覆盖，而能力集.c的数据不会被配置文件的数据覆盖。SportCamera的可变数据保存在一个大结构体中，配置文件中是个二进制文件，就是将整个结构体保存在配置文件中，每次更新数据或读取数据都会重新打开这个配置文件，这种方式数据量小的时候读写速度很快，当数据量较大时读写或管理数据就会很麻烦。现在很迫切将数据移植到sqlite中，这样更新数据或者管理数据都会较为方便，sqlite占的资源很小。我觉得用sqlite存储数据就不必考虑程序用结构体保存时的结构体关系了，就不要想结构体中的嵌套关系，可以更具用户操作界面进行划分，先根据Web界面进行划分，对于SDK的操作差异进行调整，这样整个数据保存可能会清晰一点。
+
+公钥，私钥和数字签名:https://www.cnblogs.com/shenkebky/p/8461841.html
+总结：公钥和私钥是成对的，它们互相解密。
+公钥加密，私钥解密。
+私钥数字签名，公钥验证。
+
+类成员冒号初始化以及构造函数内赋值的区别：
+C++给类成员初始化的唯一方式就是成员初始化列表，也就是构造函数后面跟冒号的那种形式。
+引用不可以被赋值”是指不能给引用本身赋值来改变它的指向，并不是说不可以改变引用指向的内存的内容。
+const int b(10);括号赋值只能在变量定义并初始化中,不能用在变量定义后再赋值
+
+全局变量有写入操作的读写都要加锁，加锁不能解决覆盖问题。
+
+使用mmap方式读写日志
+int write_memlog(char *format, ...)
+{
+	int fd;
+	int ret = OK;
+	static int off = 0;
+	static char *pMemLog = NULL;
+	
+	va_list ap;					// 可变参数结构体
+	struct tm stru_curtime;		// 年月日结构体
+	time_t curtime;				// 系统秒数
+
+	// 初始化mmap映射
+	if(NULL == pMemLog)
+	{
+		fd = open(MEMLOG_PATH, O_CREAT | O_RDWR, 00777);
+		if(fd < 0)
+		{
+			LPRT(("open memlog error: %s\n", strerror(errno)));
+			fd = open("./memlog.log", O_CREAT | O_RDWR, 00777);
+			if(fd < 0)
+			{
+				return ERROR;
+			}
+		}
+
+		pMemLog = (char *)mmap(NULL, MEMLOG_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+		if (pMemLog == (void *)-1)
+		{
+			pMemLog = NULL;
+			LPRT(("mmap error: %s\n", strerror(errno)));
+			close(fd);
+			return ERROR;
+		}
+		// 预分文件
+		ret = lseek(fd, MEMLOG_SIZE, SEEK_SET);
+		if(ret < 0)
+		{
+			LPRT(("lseek error: %s\n", strerror(errno)));
+			munmap(pMemLog, MEMLOG_SIZE);
+			pMemLog = NULL;
+			close(fd);
+			return ERROR;
+		}
+		// 如果空间满了写一下才会报错
+		ret = write(fd, "", 1);
+		if(ret < 0)
+		{
+			LPRT(("write error: %s\n", strerror(errno)));
+			munmap(pMemLog, MEMLOG_SIZE);
+			pMemLog = NULL;
+			close(fd);
+			return ERROR;
+		}
+
+		off = 0;
+		while(*(pMemLog+off) != 0 && off < MEMLOG_SIZE)
+		{
+			off++;
+		}
+
+		close(fd);
+	}
+
+	// 预留256字节，防止溢出
+	if(off > MEMLOG_SIZE - 256)
+	{
+		off = 0;
+	}
+
+	// 下面开始写日志
+	curtime = time(NULL);
+	(void)gmtime_r(&curtime, &stru_curtime);
+	off += snprintf(pMemLog + off, MEMLOG_SIZE - off, "[%02d-%02d %02d:%02d:%02d]", (stru_curtime.tm_mon + 1), \
+					stru_curtime.tm_mday, stru_curtime.tm_hour, stru_curtime.tm_min, stru_curtime.tm_sec);
+
+	va_start(ap, format);
+	off += vsnprintf(pMemLog + off, MEMLOG_SIZE - off, format, ap);
+	va_end(ap);
+	*(pMemLog + off) = 0;		// 上次写的末尾，下次启动从这开始写
+
+	return OK;
+}
+
